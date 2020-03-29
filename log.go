@@ -6,8 +6,8 @@ import (
 )
 
 type Config struct {
-	outputDir string
-	errorOutputDir string
+	OutputDir string
+	ErrorOutputDir string
 }
 
 // D represents a map of entry level data used for structured logging.
