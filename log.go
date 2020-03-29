@@ -40,3 +40,10 @@ func Init(c *Config) {
 func Info(format string, args ...interface{}) {
 	h.Log(context.Background(), _infoLevel, KV(_log, fmt.Sprintf(format, args...)))
 }
+
+// Close close resource.
+func Close() (err error) {
+	err = h.Close()
+	h = _defaultStdout
+	return
+}
