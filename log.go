@@ -34,7 +34,7 @@ func init() {
 }
 
 func Init(c *Config) {
-	h = newHandlers([]string{}, NewZap(c.outputDir, c.errorOutputDir))
+	h = newHandlers([]string{}, NewZap(c.OutputDir, c.ErrorOutputDir))
 }
 
 func Info(format string, args ...interface{}) {
