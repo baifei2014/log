@@ -32,7 +32,7 @@ func (h *StdoutHandler) Log(ctx context.Context, lv Level, args ...D) {
 		d[arg.Key] = arg.Value
 	}
 	// add extra fields
-	addExtraField(ctx, d)
+	// addExtraField(ctx, d)
 	d[_time] = time.Now().Format(_timeFormat)
 	// h.render.Render(h.out, d)
 	h.out.Write([]byte("\n"))
