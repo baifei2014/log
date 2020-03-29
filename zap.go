@@ -9,7 +9,7 @@ import (
 )
 
 type ZapLogger struct {
-	logger *zap.SugaredLogger
+	logger *zap.Logger
 }
 
 func formatEncodeTime(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
@@ -18,51 +18,52 @@ func formatEncodeTime(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
 
 // NewStdout create a stdout log handler
 func NewZap(outputDir, errorOutputDir string) *ZapLogger {
-	// sugar := zap.NewExample().Sugar()
-
-	// cfg := zap.Config{
-	// 	Encoding: "json",
-	// 	OutputPaths: []string {"/Users/jianglonghao/go/src/music/zap"},
-	// }
 
 	cfg := zap.Config{
         Level:       zap.NewAtomicLevelAt(zap.DebugLevel),
         Development: true,
         Encoding:    "json",
         EncoderConfig: zapcore.EncoderConfig{
-            TimeKey:        "t",
-            LevelKey:       "level",
-            NameKey:        "logger",
-            CallerKey:      "caller",
-            MessageKey:     "msg",
-            StacktraceKey:  "trace",
-            LineEnding:     zapcore.DefaultLineEnding,
-            EncodeLevel:    zapcore.LowercaseLevelEncoder,
-            EncodeTime:     formatEncodeTime,
-            EncodeDuration: zapcore.SecondsDurationEncoder,
-            EncodeCaller:   zapcore.ShortCallerEncoder,
-        },
+	        MessageKey: "msg",
+	        LevelKey:   "level",
+	        TimeKey:    "time",
+	        //CallerKey:      "file",
+	        CallerKey:     "caller",
+	        StacktraceKey: "trace",
+	        LineEnding:    zapcore.DefaultLineEnding,
+	        EncodeLevel:   zapcore.LowercaseLevelEncoder,
+	        //EncodeLevel:    zapcore.CapitalLevelEncoder,
+	        EncodeCaller: zapcore.ShortCallerEncoder,
+	        EncodeTime: func(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
+	            enc.AppendString(t.Format("2006-01-02 15:04:05"))
+	        },
+	        //EncodeDuration: zapcore.SecondsDurationEncoder,
+	        EncodeDuration: func(d time.Duration, enc zapcore.PrimitiveArrayEncoder) {
+	            enc.AppendInt64(int64(d) / 1000000)
+	        },
+	    },
         OutputPaths:      []string{outputDir},
         ErrorOutputPaths: []string{errorOutputDir},
-        InitialFields: map[string]interface{}{
-            "app": "test",
-        },
     }
 
 	logger, err := cfg.Build();
 	if err != nil {
 		panic(err)
 	}
-	sugar := logger.Sugar()
-	defer sugar.Sync()
+	defer logger.Sync()
 	return &ZapLogger{
-		logger:    sugar,
+		logger:    logger,
 	}
 }
 
 // Log stdout loging, only for developing env.
 func (h *ZapLogger) Log(ctx context.Context, lv Level, args ...D) {
-	h.logger.Info(args)
+	var fields []zap.Field
+	for _, v := range args[1:] {
+		item := zap.Any(v.Key, v.Value)
+		fields = append(fields, item)
+	}
+	h.logger.Info(args[0].Value.(string), fields...)
 }
 
 // Close stdout loging

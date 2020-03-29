@@ -2,7 +2,6 @@ package log
 
 import (
 	"context"
-	"time"
 
 	pkgerr "github.com/pkg/errors"
 )
@@ -90,7 +89,7 @@ func (hs Handlers) Log(c context.Context, lv Level, d ...D) {
 	if fn == "" {
 		d = append(d, KV(_source, funcName(4)))
 	}
-	d = append(d, KV(_time, time.Now()), KV(_levelValue, int(lv)), KV(_level, lv.String()))
+	d = append(d, KV(_levelValue, int(lv)), KV(_level, lv.String()))
 	for _, h := range hs.handlers {
 		h.Log(c, lv, d...)
 	}
